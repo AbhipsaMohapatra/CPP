@@ -3,6 +3,18 @@
 using namespace sf;
 using namespace std;
 
+void updateBranches(int);
+
+const int NUM_BRANCHES = 6;
+enum class side
+{
+    LEFT,
+    RIGHT,
+    NONE
+};
+side branchPositions[NUM_BRANCHES];
+Sprite Branches[NUM_BRANCHES];
+
 int main()
 {
     Vector2f resolution;
@@ -15,28 +27,31 @@ int main()
 
     Texture backgroundTexture;
     Texture treeTexture;
-    Texture branchTexture;
+   
     Texture beeTexture;
     Texture cloudsTexture;
+    Texture branchTexture;
+    Texture playerTexture;
     backgroundTexture.loadFromFile("./Sprites/graphics/background.png");
     treeTexture.loadFromFile("./Sprites/graphics/tree.png");
     branchTexture.loadFromFile("./Sprites/graphics/branch.png");
     beeTexture.loadFromFile("./Sprites/graphics/bee.png");
     cloudsTexture.loadFromFile("./Sprites/graphics/cloud.png");
+    branchTexture.loadFromFile("./Sprites/graphics/branch.png");
+    playerTexture.loadFromFile("./Sprites/graphics/player.png");
 
     Sprite backgroundSprite;
     Sprite treeSprite;
-    Sprite branchSprite;
+   
     Sprite beeSprite, beeSprite2, beeSprite3, beeSprite4;
-    Sprite cloudsSprite, cloudsSprite2,cloudsSprite3;
+    Sprite cloudsSprite, cloudsSprite2, cloudsSprite3;
     backgroundSprite.setTexture(backgroundTexture);
     backgroundSprite.setPosition(0, 0);
 
     treeSprite.setTexture(treeTexture);
     treeSprite.setPosition((resolution.x / 2) - 150, 0);
 
-    branchSprite.setTexture(branchTexture);
-    branchSprite.setPosition((resolution.x / 2) + 150, (resolution.y / 2) - 75);
+    
 
     beeSprite.setTexture(beeTexture);
     beeSprite.setPosition((resolution.x) + 300, (resolution.y / 2) - 65);
@@ -48,13 +63,31 @@ int main()
     beeSprite3.setPosition((resolution.x) + 200, (resolution.y / 2) + 45);
 
     cloudsSprite.setTexture(cloudsTexture);
-    cloudsSprite.setPosition(0,150);
+    cloudsSprite.setPosition(0, 150);
 
     cloudsSprite2.setTexture(cloudsTexture);
-    cloudsSprite2.setPosition(0,300);
+    cloudsSprite2.setPosition(0, 300);
 
     cloudsSprite3.setTexture(cloudsTexture);
-    cloudsSprite3.setPosition(0,450);
+    cloudsSprite3.setPosition(0, 450);
+
+    for (int i = 0; i < NUM_BRANCHES; i++)
+    {
+        Branches[i].setTexture(branchTexture);
+        Branches[i].setOrigin(220, 20); // According to book
+        Branches[i].setPosition(-2000, -2000);
+    }
+    updateBranches(1);
+    updateBranches(2);
+    updateBranches(3);
+    updateBranches(4);
+    updateBranches(5);
+
+
+    Sprite playerSprite;
+    playerSprite.setTexture(playerTexture);
+    playerSprite.setPosition((resolution.x/2-400),resolution.y-300);
+    side sidePlayer = side ::LEFT;
 
     float bspeed = 0.0f;
     float bspeed2 = 0.0f;
@@ -63,23 +96,22 @@ int main()
     float bheight = 0.0f;
     float bheight2 = 0.0f;
     float bheight3 = 0.0f;
-    
 
     bool beeActive = false;
     bool beeActive2 = false;
     bool beeActive3 = false;
 
-    bool cloudActive=false;
-    bool cloudActive2=false;
-    bool cloudActive3=false;
+    bool cloudActive = false;
+    bool cloudActive2 = false;
+    bool cloudActive3 = false;
 
-    float cloudSpeed=0.0;
-    float cloudSpeed2=0.0;
-    float cloudSpeed3=0.0;
+    float cloudSpeed = 0.0;
+    float cloudSpeed2 = 0.0;
+    float cloudSpeed3 = 0.0;
 
-    float cloudHeight=0.0f;
-    float cloudHeight2=0.0f;
-    float cloudHeight3=0.0f;
+    float cloudHeight = 0.0f;
+    float cloudHeight2 = 0.0f;
+    float cloudHeight3 = 0.0f;
 
     RectangleShape timeBar;
     float timeBarWidth = 400.0f;
@@ -95,7 +127,7 @@ int main()
 
     bool pause = true;
 
-    //message Text
+    // message Text
 
     Font font;
     font.loadFromFile("./Sprites/fonts/KOMIKAP_.ttf");
@@ -106,8 +138,7 @@ int main()
     messageText.setCharacterSize(100);
     messageText.setString("Press Enter To Start");
 
-    FloatRect textRect=messageText.getLocalBounds();
-    
+    FloatRect textRect = messageText.getLocalBounds();
 
     // Vector2f position = beeSprite3.getPosition();
 
@@ -118,11 +149,11 @@ int main()
         {
             window.close();
         }
-        if (Keyboard::isKeyPressed(Keyboard::Enter))
-        {
-            pause = false;
-            timeRemaining = 9.0f;
-        }
+        // if (Keyboard::isKeyPressed(Keyboard::Enter))
+        // {
+        //     pause = false;
+        //     timeRemaining = 9.0f;
+        // }
         Event event; // {Discreet Event Handing--------
 
         while (window.pollEvent(event))
@@ -131,21 +162,23 @@ int main()
             {
                 window.close();
             }
+            if(event.type==Event::KeyPressed && event.key.code==Keyboard::Enter){
+                pause = false;
+            timeRemaining = 9.0f;
+
+            }
         }
         //---------}
         if (!pause)
         {
 
             Time dt = clock.restart();
-            timeRemaining-=dt.asSeconds();
-            if(timeRemaining<=0.0){
-                pause=true;
-                
+            timeRemaining -= dt.asSeconds();
+            if (timeRemaining <= 0.0)
+            {
+                pause = true;
             }
-            timeBar.setSize(Vector2f(timeBarWidthPerSecond*timeRemaining,timeBarHeight));
-            
-
-           
+            timeBar.setSize(Vector2f(timeBarWidthPerSecond * timeRemaining, timeBarHeight));
 
             if (!beeActive)
             {
@@ -200,55 +233,84 @@ int main()
                     beeActive3 = false;
                 }
             }
-            if(!cloudActive){
-                srand(time(0)*10);
-                cloudSpeed=rand()%200+10;
-                srand(time(0)*20);
-                cloudHeight=rand()%150;
-                cloudsSprite.setPosition(-200,cloudHeight);
-                cloudActive=true;
-                
-
+            if (!cloudActive)
+            {
+                srand(time(0) * 10);
+                cloudSpeed = rand() % 200 + 10;
+                srand(time(0) * 20);
+                cloudHeight = rand() % 150;
+                cloudsSprite.setPosition(-200, cloudHeight);
+                cloudActive = true;
             }
-            else{
-                cloudsSprite.setPosition(cloudsSprite.getPosition().x+(cloudSpeed*dt.asSeconds()),cloudsSprite.getPosition().y);
-                if(cloudsSprite.getPosition().x>resolution.x+100){
-                    cloudActive=false;
+            else
+            {
+                cloudsSprite.setPosition(cloudsSprite.getPosition().x + (cloudSpeed * dt.asSeconds()), cloudsSprite.getPosition().y);
+                if (cloudsSprite.getPosition().x > resolution.x + 100)
+                {
+                    cloudActive = false;
                 }
             }
-            if(!cloudActive2){
-               srand(time(0)*10);
-                cloudSpeed2=rand()%200+10;
-                srand(time(0)*20);
-                cloudHeight2=rand()%300+150;
-                cloudsSprite2.setPosition(-200,cloudHeight2);
-                cloudActive2=true;
-                
-
+            if (!cloudActive2)
+            {
+                srand(time(0) * 10);
+                cloudSpeed2 = rand() % 200 + 10;
+                srand(time(0) * 20);
+                cloudHeight2 = rand() % 300 + 150;
+                cloudsSprite2.setPosition(-200, cloudHeight2);
+                cloudActive2 = true;
             }
-            else{
-                cloudsSprite2.setPosition(cloudsSprite2.getPosition().x+(cloudSpeed2*dt.asSeconds()),cloudsSprite2.getPosition().y);
-                if(cloudsSprite2.getPosition().x>resolution.x+100){
-                    cloudActive2=false;
+            else
+            {
+                cloudsSprite2.setPosition(cloudsSprite2.getPosition().x + (cloudSpeed2 * dt.asSeconds()), cloudsSprite2.getPosition().y);
+                if (cloudsSprite2.getPosition().x > resolution.x + 100)
+                {
+                    cloudActive2 = false;
                 }
             }
 
-            if(!cloudActive3){
-                srand(time(0)*10);
-                cloudSpeed3=rand()%200+20;
-                srand(time(0)*20);
-                cloudHeight3=rand()%300+150;
-                cloudsSprite3.setPosition(-200,cloudHeight3);
-                cloudActive3=true;
-              
-
+            if (!cloudActive3)
+            {
+                srand(time(0) * 10);
+                cloudSpeed3 = rand() % 200 + 20;
+                srand(time(0) * 20);
+                cloudHeight3 = rand() % 300 + 150;
+                cloudsSprite3.setPosition(-200, cloudHeight3);
+                cloudActive3 = true;
             }
-            else{
-                cloudsSprite3.setPosition(cloudsSprite3.getPosition().x+(cloudSpeed3*dt.asSeconds()),cloudsSprite3.getPosition().y);
-                if(cloudsSprite3.getPosition().x>resolution.x+100){
-                    cloudActive3=false;
+            else
+            {
+                cloudsSprite3.setPosition(cloudsSprite3.getPosition().x + (cloudSpeed3 * dt.asSeconds()), cloudsSprite3.getPosition().y);
+                if (cloudsSprite3.getPosition().x > resolution.x + 100)
+                {
+                    cloudActive3 = false;
                 }
             }
+            for (int i = 0; i < NUM_BRANCHES; i++)
+            {
+
+                float branchHeight = i * 150;
+                if (branchPositions[i] == side::LEFT)
+                {
+
+                    Branches[i].setPosition(resolution.x/2-220, branchHeight); // 810(tree size)-220
+                    Branches[i].setRotation(180);
+                }
+                else if (branchPositions[i] == side::RIGHT)
+                {
+
+                    Branches[i].setPosition(resolution.x/2+220, branchHeight); // 1110(tree size)+220
+                    Branches[i].setRotation(0);
+                }
+                else
+                {
+                    Branches[i].setPosition(3000, branchHeight);
+                }
+            }
+            updateBranches(1);
+            updateBranches(2);
+            updateBranches(3);
+            updateBranches(4);
+            updateBranches(5);
         }
         window.clear();
 
@@ -256,23 +318,49 @@ int main()
         window.draw(cloudsSprite);
         window.draw(cloudsSprite2);
         window.draw(cloudsSprite3);
+        for(int i=0;i<NUM_BRANCHES;i++){
+            window.draw(Branches[i]);
+        }
         window.draw(treeSprite);
 
-        // window.draw(branchSprite);
-        // branchSprite.se
-        // window.draw(branchSprite);
+        window.draw(playerSprite);
+
+        
 
         window.draw(beeSprite);
-        window.draw(beeSprite2);
+        // window.draw(beeSprite2);
 
-        window.draw(beeSprite3);
+        // window.draw(beeSprite3);
         window.draw(timeBar);
-        // window.draw(cloudsSprite);
-        // window.draw(cloudsSprite2);
-
-        // window.draw(beeSprite);
-        // cout<<i<<j<<endl;
+        
         window.display();
     }
     return 0;
+}
+
+void updateBranches(int seed)
+{
+    // SHIFT Positions to the right
+
+    for (int i = NUM_BRANCHES - 1; i > 0; i--)
+    {
+        branchPositions[i] = branchPositions[i - 1];
+    }
+
+    srand(time(0) + seed);
+    int r = rand() % 3;
+    switch (r)
+    {
+    case 0:
+        branchPositions[0] = side::LEFT;
+        break;
+
+    case 1:
+        branchPositions[0] = side::RIGHT;
+        break;
+
+    default:
+        branchPositions[0] = side::NONE;
+        break;
+    }
 }
