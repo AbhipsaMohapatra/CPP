@@ -27,11 +27,14 @@ int main()
 
     Texture backgroundTexture;
     Texture treeTexture;
-   
+
     Texture beeTexture;
     Texture cloudsTexture;
     Texture branchTexture;
     Texture playerTexture;
+    Texture graveTexture;
+    Texture axeTexture;
+    Texture logTexture;
     backgroundTexture.loadFromFile("./Sprites/graphics/background.png");
     treeTexture.loadFromFile("./Sprites/graphics/tree.png");
     branchTexture.loadFromFile("./Sprites/graphics/branch.png");
@@ -39,10 +42,13 @@ int main()
     cloudsTexture.loadFromFile("./Sprites/graphics/cloud.png");
     branchTexture.loadFromFile("./Sprites/graphics/branch.png");
     playerTexture.loadFromFile("./Sprites/graphics/player.png");
+    graveTexture.loadFromFile("./Sprites/graphics/rip.png");
+    axeTexture.loadFromFile("./Sprites/graphics/axe.png");
+    logTexture.loadFromFile("./Sprites/graphics/log.png");
 
     Sprite backgroundSprite;
     Sprite treeSprite;
-   
+
     Sprite beeSprite, beeSprite2, beeSprite3, beeSprite4;
     Sprite cloudsSprite, cloudsSprite2, cloudsSprite3;
     backgroundSprite.setTexture(backgroundTexture);
@@ -50,8 +56,6 @@ int main()
 
     treeSprite.setTexture(treeTexture);
     treeSprite.setPosition((resolution.x / 2) - 150, 0);
-
-    
 
     beeSprite.setTexture(beeTexture);
     beeSprite.setPosition((resolution.x) + 300, (resolution.y / 2) - 65);
@@ -83,11 +87,9 @@ int main()
     updateBranches(4);
     updateBranches(5);
 
+    
 
-    Sprite playerSprite;
-    playerSprite.setTexture(playerTexture);
-    playerSprite.setPosition((resolution.x/2-400),resolution.y-300);
-    side sidePlayer = side ::LEFT;
+    
 
     float bspeed = 0.0f;
     float bspeed2 = 0.0f;
@@ -137,8 +139,42 @@ int main()
     messageText.setFillColor(Color::Yellow);
     messageText.setCharacterSize(100);
     messageText.setString("Press Enter To Start");
-
     FloatRect textRect = messageText.getLocalBounds();
+    messageText.setOrigin((textRect.left + textRect.width) / 2, (textRect.top + textRect.height) / 2);
+    messageText.setPosition(resolution.x / 2, resolution.y / 2);
+
+    Sprite playerSprite;
+    playerSprite.setTexture(playerTexture);
+    playerSprite.setPosition((resolution.x / 2 - 400), resolution.y - 300);
+    side sidePlayer = side ::LEFT;
+
+    
+
+
+
+    Sprite graveSprite;
+    graveSprite.setTexture(graveTexture);
+    graveSprite.setPosition(600, 860);
+
+    Sprite axeSprite;
+    axeSprite.setTexture(axeTexture);
+    axeSprite.setPosition(700, 830);
+
+    const int AXE_POSITION_LEFT = 700;
+    const int AXE_POSITION_RIGHT = 1075;
+
+    Sprite logSprite;
+    logSprite.setTexture(logTexture);
+    logSprite.setPosition(810, 720);
+
+    bool logActive = false;
+    float logspeedX = 1000;
+    float logspeedY = -1500;
+    bool acceptInput = false;
+
+    // Chop sound out of time death
+
+    int score = 0;
 
     // Vector2f position = beeSprite3.getPosition();
 
@@ -149,11 +185,20 @@ int main()
         {
             window.close();
         }
-        // if (Keyboard::isKeyPressed(Keyboard::Enter))
-        // {
-        //     pause = false;
-        //     timeRemaining = 9.0f;
-        // }
+        if (Keyboard::isKeyPressed(Keyboard::Enter))
+        {
+            pause = false;
+            timeRemaining = 9.0f;
+            score = 0;
+            for (int i = 0; i < NUM_BRANCHES; i++)
+            {
+                branchPositions[i] = side::NONE;
+            }
+
+            graveSprite.setPosition(2000, 2000);
+            playerSprite.setPosition(580, 720);
+            acceptInput = true;
+        }
         Event event; // {Discreet Event Handing--------
 
         while (window.pollEvent(event))
@@ -162,17 +207,58 @@ int main()
             {
                 window.close();
             }
-            if(event.type==Event::KeyPressed && event.key.code==Keyboard::Enter){
-                pause = false;
-            timeRemaining = 9.0f;
+            // if(event.type==Event::KeyPressed && !pause){
+            //     acceptInput=true;
+            //     axeSprite.setPosition
+            // }
+            // if(event.type==Event::KeyPressed && event.key.code==Keyboard::Enter){
+            //     pause = false;
+            //    timeRemaining = 9.0f;
 
-            }
+            // }
         }
         //---------}
+        Time dt = clock.restart();
+        if (acceptInput)
+            {
+                // handle right cursor key
+                if (Keyboard::isKeyPressed(Keyboard::Right))
+                {
+                    score++;
+                    timeRemaining -= dt.asSeconds();
+                    sidePlayer = side::RIGHT;
+                    playerSprite.setPosition(1200, 720);
+                    axeSprite.setPosition(AXE_POSITION_RIGHT, axeSprite.getPosition().y);
+                    logSprite.setPosition(810,720);
+                    logspeedX=5000;
+                    //
+                    logActive=true;
+                    updateBranches(score);
+                    // acceptInput=false;
+                    //chopping sound played
+                }
+                if (Keyboard::isKeyPressed(Keyboard::Left))
+                {
+                    score++;
+                    timeRemaining -= dt.asSeconds();
+                    sidePlayer = side::LEFT;
+                    playerSprite.setPosition(580,720);
+                    axeSprite.setPosition(AXE_POSITION_LEFT, axeSprite.getPosition().y);
+                    logSprite.setPosition(810,720);
+                    logspeedX=-5000;
+                    logActive=true;
+                    //
+                    updateBranches(score);
+                    // acceptInput=false;
+                    //chopping sound played
+                }
+            }
+
         if (!pause)
         {
+            
 
-            Time dt = clock.restart();
+            
             timeRemaining -= dt.asSeconds();
             if (timeRemaining <= 0.0)
             {
@@ -285,6 +371,7 @@ int main()
                     cloudActive3 = false;
                 }
             }
+            
             for (int i = 0; i < NUM_BRANCHES; i++)
             {
 
@@ -292,13 +379,13 @@ int main()
                 if (branchPositions[i] == side::LEFT)
                 {
 
-                    Branches[i].setPosition(resolution.x/2-220, branchHeight); // 810(tree size)-220
+                    Branches[i].setPosition(resolution.x / 2 - 220, branchHeight); // 810(tree size)-220
                     Branches[i].setRotation(180);
                 }
                 else if (branchPositions[i] == side::RIGHT)
                 {
 
-                    Branches[i].setPosition(resolution.x/2+220, branchHeight); // 1110(tree size)+220
+                    Branches[i].setPosition(resolution.x / 2 + 220, branchHeight); // 1110(tree size)+220
                     Branches[i].setRotation(0);
                 }
                 else
@@ -306,11 +393,51 @@ int main()
                     Branches[i].setPosition(3000, branchHeight);
                 }
             }
-            updateBranches(1);
-            updateBranches(2);
-            updateBranches(3);
-            updateBranches(4);
-            updateBranches(5);
+            // updateBranches(1);
+            // updateBranches(2);
+            // updateBranches(3);
+            // updateBranches(4);
+            // updateBranches(5);
+            //We have already used it in left right
+
+            if(logActive){
+                logSprite.setPosition(logSprite.getPosition().x+(dt.asSeconds()*logspeedX),logSprite.getPosition().y+(dt.asSeconds()*logspeedY));
+                if(logSprite.getPosition().x<-100 || logSprite.getPosition().x>resolution.x+90){
+                    logSprite.setPosition(810, 720);
+                    logActive=false;
+
+                }
+                
+
+            }
+
+
+            if(branchPositions[5]==sidePlayer){
+                // pause the game
+                pause=true;
+
+                //Accetiong no input
+                acceptInput=false;
+
+                //hide the player
+                playerSprite.setPosition(2000,2000);
+
+                //show grave stone
+                graveSprite.setPosition(600,860);
+
+                //show game over message
+                messageText.setString("Game Over");
+                textRect=messageText.getLocalBounds();
+                messageText.setOrigin((textRect.left+textRect.width)/2.0,((textRect.top+textRect.height)/2.0));
+                messageText.setPosition(resolution.x / 2, resolution.y / 2);
+
+                //play sound of death
+
+
+            }
+
+            
+
         }
         window.clear();
 
@@ -318,21 +445,27 @@ int main()
         window.draw(cloudsSprite);
         window.draw(cloudsSprite2);
         window.draw(cloudsSprite3);
-        for(int i=0;i<NUM_BRANCHES;i++){
+        for (int i = 0; i < NUM_BRANCHES; i++)
+        {
             window.draw(Branches[i]);
         }
         window.draw(treeSprite);
 
         window.draw(playerSprite);
 
-        
+        window.draw(axeSprite);
+
+        window.draw(logSprite);
+
+        window.draw(graveSprite);
+
 
         window.draw(beeSprite);
         // window.draw(beeSprite2);
 
         // window.draw(beeSprite3);
         window.draw(timeBar);
-        
+        window.draw(messageText);
         window.display();
     }
     return 0;
