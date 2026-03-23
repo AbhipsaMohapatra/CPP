@@ -87,21 +87,17 @@ int main()
     updateBranches(4);
     updateBranches(5);
 
-    
-
-    
-
     float bspeed = 0.0f;
-    float bspeed2 = 0.0f;
-    float bspeed3 = 0.0f;
+    // float bspeed2 = 0.0f;
+    // float bspeed3 = 0.0f;
 
     float bheight = 0.0f;
-    float bheight2 = 0.0f;
-    float bheight3 = 0.0f;
+    // float bheight2 = 0.0f;
+    // float bheight3 = 0.0f;
 
     bool beeActive = false;
-    bool beeActive2 = false;
-    bool beeActive3 = false;
+    // bool beeActive2 = false;
+    // bool beeActive3 = false;
 
     bool cloudActive = false;
     bool cloudActive2 = false;
@@ -145,12 +141,17 @@ int main()
 
     Sprite playerSprite;
     playerSprite.setTexture(playerTexture);
-    playerSprite.setPosition((resolution.x / 2 - 400), resolution.y - 300);
+    playerSprite.setPosition((resolution.x / 2 - 400), resolution.y/2 );
+    
     side sidePlayer = side ::LEFT;
 
-    
-
-
+    // Score
+    Text scoreText;
+    scoreText.setFont(font);
+    scoreText.setCharacterSize(80);
+    scoreText.setFillColor(Color::Red);
+    scoreText.setPosition(20, 20); // top-left corner
+    scoreText.setString("Score = 0");
 
     Sprite graveSprite;
     graveSprite.setTexture(graveTexture);
@@ -194,9 +195,10 @@ int main()
             {
                 branchPositions[i] = side::NONE;
             }
+            
 
             graveSprite.setPosition(2000, 2000);
-            playerSprite.setPosition(580, 720);
+            playerSprite.setPosition((resolution.x/2)-400,(resolution.y/2)+150);
             acceptInput = true;
         }
         Event event; // {Discreet Event Handing--------
@@ -207,6 +209,11 @@ int main()
             {
                 window.close();
             }
+
+            // if(event.type==Event::KeyReleased && !pause){
+            //     acceptInput=true;
+            //     axeSprite.setPosition(2000,axeSprite.getPosition().y);
+            // }
             // if(event.type==Event::KeyPressed && !pause){
             //     acceptInput=true;
             //     axeSprite.setPosition
@@ -220,45 +227,51 @@ int main()
         //---------}
         Time dt = clock.restart();
         if (acceptInput)
+        {
+            // handle right cursor key
+            if (Keyboard::isKeyPressed(Keyboard::Right))
             {
-                // handle right cursor key
-                if (Keyboard::isKeyPressed(Keyboard::Right))
-                {
-                    score++;
-                    timeRemaining -= dt.asSeconds();
-                    sidePlayer = side::RIGHT;
-                    playerSprite.setPosition(1200, 720);
-                    axeSprite.setPosition(AXE_POSITION_RIGHT, axeSprite.getPosition().y);
-                    logSprite.setPosition(810,720);
-                    logspeedX=5000;
-                    //
-                    logActive=true;
-                    updateBranches(score);
-                    // acceptInput=false;
-                    //chopping sound played
-                }
-                if (Keyboard::isKeyPressed(Keyboard::Left))
-                {
-                    score++;
-                    timeRemaining -= dt.asSeconds();
-                    sidePlayer = side::LEFT;
-                    playerSprite.setPosition(580,720);
-                    axeSprite.setPosition(AXE_POSITION_LEFT, axeSprite.getPosition().y);
-                    logSprite.setPosition(810,720);
-                    logspeedX=-5000;
-                    logActive=true;
-                    //
-                    updateBranches(score);
-                    // acceptInput=false;
-                    //chopping sound played
-                }
+                score++;
+                //Added score
+                scoreText.setString("Score = " + to_string(score));
+                // Remoed time remaining  
+                // timeRemaining -= dt.asSeconds();
+                sidePlayer = side::RIGHT;
+                playerSprite.setPosition((resolution.x/2)+200,(resolution.y/2)-100);
+                axeSprite.setPosition(playerSprite.getPosition().x-140, playerSprite.getPosition().y+150);
+                // logSprite.setPosition(810,720);
+                logSprite.setPosition(treeSprite.getPosition().x, treeSprite.getPosition().y + 600);
+                logspeedX = 5000;
+                //
+                logActive = true;
+                updateBranches(score);
+                // acceptInput=false;
+                // chopping sound played
             }
+            if (Keyboard::isKeyPressed(Keyboard::Left))
+            {
+                score++;
+                //Added score
+                scoreText.setString("Score = " + to_string(score));
+                //
+                // timeRemaining -= dt.asSeconds();
+                sidePlayer = side::LEFT;
+                playerSprite.setPosition((resolution.x/2)-400,(resolution.y/2)-150);
+                axeSprite.setPosition(playerSprite.getPosition().x+140, playerSprite.getPosition().y+150);
+                // logSprite.setPosition(810,720);
+                logSprite.setPosition(treeSprite.getPosition().x, treeSprite.getPosition().y + 600);
+                logspeedX = -5000;
+                logActive = true;
+                //
+                updateBranches(score);
+                // acceptInput=false;
+                // chopping sound played
+            }
+        }
 
         if (!pause)
         {
-            
 
-            
             timeRemaining -= dt.asSeconds();
             if (timeRemaining <= 0.0)
             {
@@ -284,41 +297,41 @@ int main()
                 }
             }
 
-            if (!beeActive2)
-            {
-                srand(time(0) * 20);
-                bspeed2 = rand() % 200 + 200;
-                srand(time(0) * 30);
-                bheight2 = rand() % 500 + 500;
-                beeSprite2.setPosition(2000, bheight2);
-                beeActive2 = true;
-            }
-            else
-            {
-                beeSprite2.setPosition(beeSprite2.getPosition().x - (bspeed2 * dt.asSeconds()), beeSprite2.getPosition().y);
-                if (beeSprite2.getPosition().x < (-100))
-                {
-                    beeActive2 = false;
-                }
-            }
+            // if (!beeActive2)
+            // {
+            //     srand(time(0) * 20);
+            //     bspeed2 = rand() % 200 + 200;
+            //     srand(time(0) * 30);
+            //     bheight2 = rand() % 500 + 500;
+            //     beeSprite2.setPosition(2000, bheight2);
+            //     beeActive2 = true;
+            // }
+            // else
+            // {
+            //     beeSprite2.setPosition(beeSprite2.getPosition().x - (bspeed2 * dt.asSeconds()), beeSprite2.getPosition().y);
+            //     if (beeSprite2.getPosition().x < (-100))
+            //     {
+            //         beeActive2 = false;
+            //     }
+            // }
 
-            if (!beeActive3)
-            {
-                srand(time(0) * 20);
-                bspeed3 = rand() % 200 + 200;
-                srand(time(0) * 30);
-                bheight3 = rand() % 500 + 500;
-                beeSprite3.setPosition(2000, bheight3);
-                beeActive3 = true;
-            }
-            else
-            {
-                beeSprite3.setPosition(beeSprite3.getPosition().x - (bspeed3 * dt.asSeconds()), beeSprite3.getPosition().y);
-                if (beeSprite3.getPosition().x < (-100))
-                {
-                    beeActive3 = false;
-                }
-            }
+            // if (!beeActive3)
+            // {
+            //     srand(time(0) * 20);
+            //     bspeed3 = rand() % 200 + 200;
+            //     srand(time(0) * 30);
+            //     bheight3 = rand() % 500 + 500;
+            //     beeSprite3.setPosition(2000, bheight3);
+            //     beeActive3 = true;
+            // }
+            // else
+            // {
+            //     beeSprite3.setPosition(beeSprite3.getPosition().x - (bspeed3 * dt.asSeconds()), beeSprite3.getPosition().y);
+            //     if (beeSprite3.getPosition().x < (-100))
+            //     {
+            //         beeActive3 = false;
+            //     }
+            // }
             if (!cloudActive)
             {
                 srand(time(0) * 10);
@@ -371,7 +384,7 @@ int main()
                     cloudActive3 = false;
                 }
             }
-            
+
             for (int i = 0; i < NUM_BRANCHES; i++)
             {
 
@@ -398,50 +411,45 @@ int main()
             // updateBranches(3);
             // updateBranches(4);
             // updateBranches(5);
-            //We have already used it in left right
+            // We have already used it in left right
 
-            if(logActive){
-                logSprite.setPosition(logSprite.getPosition().x+(dt.asSeconds()*logspeedX),logSprite.getPosition().y+(dt.asSeconds()*logspeedY));
-                if(logSprite.getPosition().x<-100 || logSprite.getPosition().x>resolution.x+90){
+            if (logActive)
+            {
+                logSprite.setPosition(logSprite.getPosition().x + (dt.asSeconds() * logspeedX), logSprite.getPosition().y + (dt.asSeconds() * logspeedY));
+                if (logSprite.getPosition().x < -100 || logSprite.getPosition().x > resolution.x + 90)
+                {
                     logSprite.setPosition(810, 720);
-                    logActive=false;
-
+                    logActive = false;
                 }
-                
-
             }
 
-
-            if(branchPositions[5]==sidePlayer){
+            if (branchPositions[5] == sidePlayer)
+            {
                 // pause the game
-                pause=true;
+                pause = true;
 
-                //Accetiong no input
-                acceptInput=false;
+                // Accetiong no input
+                acceptInput = false;
 
-                //hide the player
-                playerSprite.setPosition(2000,2000);
+                // hide the player
+                playerSprite.setPosition(2000, 2000);
 
-                //show grave stone
-                graveSprite.setPosition(600,860);
+                // show grave stone
+                graveSprite.setPosition(600, 860);
 
-                //show game over message
+                // show game over message
                 messageText.setString("Game Over");
-                textRect=messageText.getLocalBounds();
-                messageText.setOrigin((textRect.left+textRect.width)/2.0,((textRect.top+textRect.height)/2.0));
+                textRect = messageText.getLocalBounds();
+                messageText.setOrigin((textRect.left + textRect.width) / 2.0, ((textRect.top + textRect.height) / 2.0));
                 messageText.setPosition(resolution.x / 2, resolution.y / 2);
 
-                //play sound of death
-
-
+                // play sound of death
             }
-
-            
-
         }
         window.clear();
 
         window.draw(backgroundSprite);
+        
         window.draw(cloudsSprite);
         window.draw(cloudsSprite2);
         window.draw(cloudsSprite3);
@@ -459,13 +467,13 @@ int main()
 
         window.draw(graveSprite);
 
-
         window.draw(beeSprite);
         // window.draw(beeSprite2);
 
         // window.draw(beeSprite3);
         window.draw(timeBar);
         window.draw(messageText);
+        window.draw(scoreText);
         window.display();
     }
     return 0;
